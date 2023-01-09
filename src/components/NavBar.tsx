@@ -5,7 +5,7 @@ export interface INavBarProps {}
 
 const NavBar: React.FunctionComponent<INavBarProps> = (props) => {
   return (
-    <div className="w-full h-12 bg-black flex flex-row items-center">
+    <div className="w-full h-12 flex flex-row items-center border bg-green-500 text-white">
       <Link className="text-white text-lg mr-auto ml-5" to="/">
         Home
       </Link>

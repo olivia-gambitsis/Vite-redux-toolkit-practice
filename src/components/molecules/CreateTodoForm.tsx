@@ -1,16 +1,40 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { addNewTodo } from "../../features/todos/todosSlice";
+import { addNewTodo, updateTodo } from "../../features/todos/todosSlice";
 import { Button } from "../atoms/Button";
 import { InputField } from "../atoms/InputField";
+import { ModalWrapper } from "./ModalWrapper";
+import { todo } from "../../fakeData";
 
-export interface ICreateTodoFormProps {}
+export enum todoFormTypes {
+  Create = "CREATE",
+  Edit = "EDIT",
+}
 
-export const CreateTodoForm = (props: ICreateTodoFormProps) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [estimatedTimeToComplete, setEstimatedTimeToComplete] = useState("");
+export interface ICreateTodoFormProps {
+  toggleModal: () => void;
+  type: todoFormTypes;
+  editingTodo?: todo;
+}
+
+export const CreateTodoForm = ({
+  toggleModal,
+  type,
+  editingTodo,
+}: ICreateTodoFormProps) => {
+  const [name, setName] = useState(
+    type === todoFormTypes.Edit && editingTodo ? editingTodo.name : ""
+  );
+  const [description, setDescription] = useState(
+    type === todoFormTypes.Edit && editingTodo ? editingTodo.description : ""
+  );
+  const [estimatedTimeToComplete, setEstimatedTimeToComplete] = useState(
+    type === todoFormTypes.Edit && editingTodo
+      ? editingTodo.estimatedTimeToComplete
+      : ""
+  );
   const [addRequestStatus, setAddRequestStatus] = useState("idle");
+
 
   const onNameChanged = (e: React.ChangeEvent<HTMLInputElement>) =>
     setName(e.target.value);
@@ -28,12 +52,19 @@ export const CreateTodoForm = (props: ICreateTodoFormProps) => {
     if (canAddTodo) {
       try {
         setAddRequestStatus("pending");
-        await dispatch(
-          addNewTodo({ name, description, estimatedTimeToComplete })
-        ).unwrap();
-        setName("");
-        setDescription("");
-        setEstimatedTimeToComplete("");
+        if (type === todoFormTypes.Edit && editingTodo) {
+          await dispatch(
+            updateTodo({ id: editingTodo.id, name, description, estimatedTimeToComplete })
+          ).unwrap()
+        } else {
+          await dispatch(
+            addNewTodo({ name, description, estimatedTimeToComplete })
+          ).unwrap()
+        }
+        // setName("");
+        // setDescription("");
+        // setEstimatedTimeToComplete("");
+        toggleModal();
       } catch (err) {
         console.error("Failed to save the post: ", err);
       } finally {
@@ -43,32 +74,41 @@ export const CreateTodoForm = (props: ICreateTodoFormProps) => {
   };
 
   return (
-    <div>
-      <h2>Create Task</h2>
-      <form onSubmit={handleSubmit}>
-        <div className="row">
-          <div className="form-group col-md-6">
-            <InputField label={"name"} onChange={onNameChanged} value={name} />
+    <>
+      <ModalWrapper toggleModal={toggleModal} isShown={true}>
+        <>
+          <div className="mx-5 lg:mx-56 mt-12 gap-12 text-navy flex flex-col last:mb-12">
+            <h1 className="text-center text-h5 text-lavender-floral">
+              {type === todoFormTypes.Create ? "Create Todo" : "Edit Todo"}
+            </h1>
+            <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+              <InputField
+                label={"name"}
+                onChange={onNameChanged}
+                value={name}
+                type="text"
+              />
+              <InputField
+                label={"description"}
+                onChange={onDescriptionChanged}
+                value={description}
+                type="text"
+              />
+              <InputField
+                label={"Time to complete (mins)"}
+                onChange={onEstimatedHoursChanged}
+                value={estimatedTimeToComplete}
+                type="number"
+              />
+
+              <Button
+                type="submit"
+                label={type === todoFormTypes.Create ? "CREATE" : "EDIT"}
+              />
+            </form>
           </div>
-          <div className="form-group col-md-6">
-            <InputField
-              label={"description"}
-              onChange={onDescriptionChanged}
-              value={description}
-            />
-          </div>
-        </div>
-        <div className="row">
-          <div className="form-group col-md-12">
-            <InputField
-              label={"estimatedHours"}
-              onChange={onEstimatedHoursChanged}
-              value={estimatedTimeToComplete}
-            />
-          </div>
-        </div>
-        <Button type='submit' label='Create'/>
-      </form>
-    </div>
+        </>
+      </ModalWrapper>
+    </>
   );
 };

@@ -40,7 +40,7 @@ export const Button = ({
   return (
     <button
       type={type}
-      className='rounded-md bg-green-300 py-2.5 px-4'
+      className='rounded-md bg-green-300 py-2.5 px-4 hover:bg-green-500 hover:text-white text-button'
       // className={['storybook-button', `storybook-button--${size}`, mode].join(' ')}
       style={{ backgroundColor }}
       onClick={onClick}

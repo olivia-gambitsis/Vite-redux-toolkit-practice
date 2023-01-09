@@ -8,39 +8,33 @@ import {
   fetchTodos,
 } from "../features/todos/todosSlice";
 import TodoCard from "../components/TodoCard";
-import { CreateTodoForm } from "../components/molecules/CreateTodoForm";
+import { CreateTodoForm, todoFormTypes } from "../components/molecules/CreateTodoForm";
 import { InputField } from "../components/atoms/InputField";
+import { useModal } from "../helpers/useModal";
+import { Button } from "../components/atoms/Button";
+import ModalButton from "../components/molecules/ModalButton";
 
 export interface IHomeProps {}
 
 export default function Home(props: IHomeProps) {
+
+  
+  const [addRequestStatus, setAddRequestStatus] = useState("idle");
+  
+  const { entities, error, loading } = useAppSelector((state) => state.todos);
+  const dispatch = useAppDispatch();
   useEffect(() => {
     dispatch(fetchTodos());
   }, []);
-
-  const [addRequestStatus, setAddRequestStatus] = useState("idle");
-
-  const handleDelete = (id: string) => {
-    dispatch(deleteTodo(id));
-  };
-
-  const { entities, error, loading } = useAppSelector((state) => state.todos);
-  const dispatch = useAppDispatch();
-
+  
   if (loading) return <h1>Loading</h1>;
 
+  // <h1 className="text-h1 text-light-green">TODOS</h1>
   return (
     <>
-    <CreateTodoForm/>
-      <div>
-        {!loading &&
-          entities.map((ent) => (
-            <p key={ent.id}>
-              {" "}
-              <button onClick={() => handleDelete(ent.id)}>delete</button>
-              <TodoCard todo={ent} />
-            </p>
-          ))}
+      <div className="flex flex-col w-full justify-center items-center pt-8">
+        { entities.length > 0 && <TodoList todos={entities} />}
+        <ModalButton type={todoFormTypes.Create}/>
       </div>
     </>
   );

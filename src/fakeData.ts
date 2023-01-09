@@ -4,6 +4,7 @@ export interface todo {
   description: string;
   estimatedTimeToComplete: string;
   completed?: boolean;
+  orderIndex?: number;
 }
 
 export interface newTodoRequest {
@@ -11,6 +12,7 @@ export interface newTodoRequest {
   description: string;
   estimatedTimeToComplete: string;
   completed?: boolean;
+  orderIndex?: number;
 }
 
 export const todoData: todo[] = [

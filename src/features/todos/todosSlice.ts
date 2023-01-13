@@ -36,6 +36,8 @@ export const addNewTodo = createAsyncThunk(
       name: newTodo.name,
       description: newTodo.description,
       estimatedTimeToComplete: newTodo.estimatedTimeToComplete,
+      isComplete: false,
+      orderIndex: newTodo.orderIndex 
     };
     const response = await axios.post<todo>(API_URL, todoItem);
     return response.data;
@@ -50,34 +52,37 @@ export const updateTodo = createAsyncThunk(
       name: todo.name,
       description: todo.description,
       estimatedTimeToComplete: todo.estimatedTimeToComplete,
+      isComplete: todo.isComplete,
       orderIndex: todo.orderIndex
     };
     const response = await axios.put(`${API_URL}/${todo.id}`, updatedTodo);
-    return response.data;
+    if(response){
+      return updatedTodo
+    }
   }
 );
 
-// export const voteProject = createAsyncThunk(
-//   "projects/voteProject",
-//   async (data) => {
-//     try {
-//       const response = await axios.put(
-//         "/api/v1/works/61fe5ee76b924c82c53b7513",
-//         data
-//       );
-//       return response.data;
-//     } catch (err) {
-//       // custom error
-//     }
-//   }
-// );
+export const toggleComplete = createAsyncThunk(
+  "todos/toggleComplete",
+  async (todo: todo) => {
+    const updatedTodo = {
+      isComplete: !todo.isComplete
+    };
+    const response = await axios.patch(`${API_URL}/${todo.id}`, updatedTodo);
+    if(response){
+      return response
+    }
+  }
+);
+
 
 export const deleteTodo = createAsyncThunk(
   "todos/deleteTodo",
   async (id: string) => {
     const response = await axios.delete(`${API_URL}/${id}`);
-    console.log(response.data);
-    return id;
+    if(response){
+      return id
+    }
   }
 );
 
@@ -130,17 +135,22 @@ const todosSlice = createSlice({
         state.entities.push(action.payload);
       })
       .addCase(deleteTodo.fulfilled, (state, action: PayloadAction<any>) => {
-        console.log('del', action.payload)
-        let index = state.entities.findIndex(
-          ({ id }) => id === action.payload.id
-        );
-        state.entities.splice(index, 1);
+        state.entities = state.entities.filter(entity => entity.id !== action.payload)
       })
       .addCase(updateTodo.fulfilled, (state, action:PayloadAction<any>) =>{
-        console.log(action.payload)
         let todo = state.entities.find(todo => todo.id === action.payload.id);
         if(todo){
-        
+         todo.name = action.payload.name;
+         todo.description = action.payload.description;
+         todo.estimatedTimeToComplete = action.payload.estimatedTimeToComplete;
+         todo.isComplete = action.payload.completed;
+         todo.orderIndex = action.payload.orderIndex;
+        }
+      })
+      .addCase(toggleComplete.fulfilled, (state, action:PayloadAction<any>) =>{
+        let todo = state.entities.find(todo => todo.id === action.payload.id);
+        if(todo){
+          todo.isComplete = !action.payload.completed;
         }
       })
   },

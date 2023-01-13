@@ -13,17 +13,26 @@ import {
 import { CreateTodoForm, todoFormTypes } from "./molecules/CreateTodoForm";
 import ModalButton from "./molecules/ModalButton";
 import { Draggable } from "react-beautiful-dnd";
+import { useAppDispatch } from "../app/hooks";
+import { deleteTodo, toggleComplete, updateTodo } from "../features/todos/todosSlice";
 
 export interface ITodoCardProps {
   todo: todo;
   index: number;
-  handleDelete?: (id: string) => void;
 }
 
-export default function TodoCard({ todo, handleDelete, index }: ITodoCardProps) {
-  const [completed, setCompleted] = useState(false);
+export default function TodoCard({ todo, index }: ITodoCardProps) {
+  const [completed, setCompleted] = useState(todo.isComplete ?? false);
   const [showDetails, setShowDetails] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const dispatch = useAppDispatch()
+
+  const handleCompleteTodo = (todo: todo) =>{
+    dispatch(updateTodo({
+      ...todo, isComplete: !completed
+    }))
+    setCompleted(!completed)
+  }
 
 
   return (
@@ -37,7 +46,7 @@ export default function TodoCard({ todo, handleDelete, index }: ITodoCardProps) 
         >
           <div className=" flex flex-row gap-4 items-center justify-between">
             <div className="flex flex-row items-center gap-4 ">
-              <div onClick={() => setCompleted(!completed)}>
+              <div onClick={() => handleCompleteTodo(todo)}>
                 {" "}
                 {completed ? <CheckIcon /> : <UncheckIcon />}
               </div>
@@ -78,7 +87,7 @@ export default function TodoCard({ todo, handleDelete, index }: ITodoCardProps) 
           <div className={`${showOptions ? "block" : "hidden"}`}>
             <button
               className="absolute top-2 -right-12 rounded-full bg-light-green p-2"
-              onClick={() => handleDelete && handleDelete(todo.id)}
+              onClick={() => dispatch(deleteTodo(todo.id)) }
             >
               <DeleteIcon />
             </button>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { addNewTodo, updateTodo } from "../../features/todos/todosSlice";
+import { addNewTodo, fetchTodos, updateTodo } from "../../features/todos/todosSlice";
 import { Button } from "../atoms/Button";
 import { InputField } from "../atoms/InputField";
 import { ModalWrapper } from "./ModalWrapper";

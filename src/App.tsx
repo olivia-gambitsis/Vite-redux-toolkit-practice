@@ -19,7 +19,7 @@ export default function App(props: IAppProps) {
         <Route path="/something" element={<Something />} />
         <Route path="/something-else" element={<SomethingElse />} />
       </Routes>
-      <Footer/>
+      <Footer />
     </>
   );
 }
